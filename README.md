@@ -29,14 +29,25 @@ Built for live DJing and Karaoke environments, this tool eliminates the need to 
 ## 🛠️ Prerequisites & Installation
 
 1. **Operating System:** Windows 10/11 (Required for the specific audio API hooks).
-2. **Dependencies:**
+2. **Python Dependencies:**
    ```bash
-   pip install customtkinter
+   pip install -r requirements.txt
    ```
-3. **SoundVolumeView:** The executable `SoundVolumeView.exe` must be placed in the root directory of this project.
-4. **Application Structure:** The Launchpad expects isolated applications to be located in an `apps/` subdirectory relative to the executable:
-   * `/apps/Chrome1/App/Chrome-bin/chrome1.exe`
-   * `/apps/Chrome2/App/Chrome-bin/chrome2.exe`
+   *(Or manually via `pip install customtkinter`)*
+
+3. **SoundVolumeView Engine:**
+   * Download [SoundVolumeView by NirSoft](https://www.nirsoft.net/utils/sound_volume_view.html).
+   * Extract the ZIP and place `SoundVolumeView.exe` directly in the root directory of this project.
+
+4. **Portable Applications (The Launchpad):**
+   The integrated Launchpad relies on isolated portable applications to ensure audio streams can be routed independently without interfering with your main desktop browser. Download the necessary portable apps here:
+   * [Google Chrome Portable](https://portableapps.com/apps/internet/google_chrome_portable)
+   * [VLC Media Player Portable](https://portableapps.com/apps/music_video/vlc_portable)
+
+5. **Application Folder Structure:**
+   Once downloaded, extract them into an `apps/` subdirectory within this project. To create two independent Chrome profiles for CH1 and CH2, install Chrome Portable twice into separate folders and rename the executables. Your final structure must look exactly like this:
+   * `/apps/Chrome1/App/Chrome-bin/chrome1.exe` *(Note: renamed from chrome.exe)*
+   * `/apps/Chrome2/App/Chrome-bin/chrome2.exe` *(Note: renamed from chrome.exe)*
    * `/apps/VLC/VLCPortable.exe`
 
 ## 🕹️ Usage
@@ -54,4 +65,3 @@ python mk3_mix_gui.py
 
 ## ⚠️ Disclaimer
 This application modifies Windows default audio endpoints on a per-application basis. Ensure you have the correct audio drivers installed and that applications are currently outputting audio (unmuted in the Windows volume mixer) for the hooks to latch onto them successfully.
-
