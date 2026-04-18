@@ -1,0 +1,20 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+env/
+
+# Third-party Binaries & Apps
+*.exe
+SoundVolumeView.exe
+apps/
+
+# Runtime Generated Files
+temp_audio.csv
+
+# IDE Files
+.vscode/
+.idea/
