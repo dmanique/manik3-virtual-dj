@@ -29,11 +29,15 @@ Built for live DJing and Karaoke environments, this tool eliminates the need to 
 ## 🛠️ Prerequisites & Installation
 
 1. **Operating System:** Windows 10/11 (Required for the specific audio API hooks).
-2. **Python Dependencies:**
+2. **Install Python & Pip:**
+   If you do not have Python installed on your computer, follow these steps:
+   * Go to [python.org/downloads](https://www.python.org/downloads/) and download the latest Windows installer.
+   * Run the installer. **🚨 CRITICAL STEP:** At the very bottom of the first installation screen, you MUST check the box that says **"Add python.exe to PATH"** before clicking "Install Now".
+   * Once installed, open your Command Prompt (cmd) and type `python --version` to verify it was installed successfully.
+   * Now that Python is installed, you need to install the user interface library. Open your Command Prompt, navigate to this project folder, and run:
    ```bash
    pip install -r requirements.txt
    ```
-   *(Or manually via `pip install customtkinter`)*
 
 3. **SoundVolumeView Engine:**
    * Download [SoundVolumeView by NirSoft](https://www.nirsoft.net/utils/sound_volume_view.html).
