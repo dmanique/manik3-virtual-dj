@@ -9,7 +9,7 @@ A graphical audio routing matrix and state manager designed to dynamically inter
 Built for live DJing and Karaoke environments, this tool eliminates the need to navigate clunky Windows audio settings by providing a tactile, 4-channel hardware-style mixer interface to route browsers, media players, and extra applications on the fly.
 
 ![MANIK3 Virtual DJ Screenshot](./screenshot.png) 
-
+*(Note: Add a screenshot of your GUI here and name it screenshot.png)*
 
 ## 🚀 Key Features
 
@@ -26,22 +26,30 @@ Built for live DJing and Karaoke environments, this tool eliminates the need to 
 * **Backend Logic:** Python `subprocess` and `ctypes` for executing shell commands, reading Tasklist CSV outputs, and interacting with the Windows Shell.
 * **Audio Engine Broker:** Interfaces with NirSoft's `SoundVolumeView` CLI to execute `/SetAppDefault`, `/Mute`, and `/Unmute` commands silently in the background (`NO_WINDOW` flag).
 
-## 🛠️ Prerequisites & Installation
+## 🛠️ Installation & Setup
 
+### Option 1: Quick Start (Pre-compiled Release)
+If you just want to use the application without installing Python, download the latest release bundle:
+1. Go to the **Releases** section on the right side of this GitHub page.
+2. Download the latest `MANIK3_Virtual_DJ_v1.0.zip` file.
+3. Extract the folder to your computer. It already contains the `.exe` and the required folder structure.
+4. Proceed to step 3 below to add the required audio engine and portable apps.
+
+### Option 2: Developer Setup (Run from Source)
 1. **Operating System:** Windows 10/11 (Required for the specific audio API hooks).
 2. **Install Python & Pip:**
    If you do not have Python installed on your computer, follow these steps:
    * Go to [python.org/downloads](https://www.python.org/downloads/) and download the latest Windows installer.
    * Run the installer. **🚨 CRITICAL STEP:** At the very bottom of the first installation screen, you MUST check the box that says **"Add python.exe to PATH"** before clicking "Install Now".
-   * Once installed, open your Command Prompt (cmd) and type `python --version` to verify it was installed successfully.
-   * Now that Python is installed, you need to install the user interface library. Open your Command Prompt, navigate to this project folder, and run:
+   * Open your Command Prompt (cmd), navigate to this project folder, and run:
    ```bash
    pip install -r requirements.txt
    ```
 
+### Shared Requirements (Required for both options)
 3. **SoundVolumeView Engine:**
    * Download [SoundVolumeView by NirSoft](https://www.nirsoft.net/utils/sound_volume_view.html).
-   * Extract the ZIP and place `SoundVolumeView.exe` directly in the root directory of this project.
+   * Extract the ZIP and place `SoundVolumeView.exe` directly in the root directory (in the same folder as your Python script or `MANIK3_Mixer.exe`).
 
 4. **Portable Applications (The Launchpad):**
    The integrated Launchpad relies on isolated portable applications to ensure audio streams can be routed independently without interfering with your main desktop browser. Download the necessary portable apps here:
@@ -49,14 +57,14 @@ Built for live DJing and Karaoke environments, this tool eliminates the need to 
    * [VLC Media Player Portable](https://portableapps.com/apps/music_video/vlc_portable)
 
 5. **Application Folder Structure:**
-   Once downloaded, extract them into an `apps/` subdirectory within this project. To create two independent Chrome profiles for CH1 and CH2, install Chrome Portable twice into separate folders and rename the executables. Your final structure must look exactly like this:
-   * `/apps/Chrome1/App/Chrome-bin/chrome1.exe` *(Note: renamed from chrome.exe)*
-   * `/apps/Chrome2/App/Chrome-bin/chrome2.exe` *(Note: renamed from chrome.exe)*
-   * `/apps/VLC/VLCPortable.exe`
+   Once downloaded, extract them into the `apps/` subdirectory. To create two independent Chrome profiles for CH1 and CH2, install Chrome Portable twice into separate folders and rename the executables. Your final structure must look exactly like this:
+   * `apps/Chrome1/App/Chrome-bin/chrome1.exe` *(Note: renamed from chrome.exe)*
+   * `apps/Chrome2/App/Chrome-bin/chrome2.exe` *(Note: renamed from chrome.exe)*
+   * `apps/VLC/VLCPortable.exe`
 
 ## 🕹️ Usage
 
-Run the Python script directly, or compile it into an executable using PyInstaller. 
+To start the application, either **double-click the compiled `MANIK3_Mixer.exe`** or run the Python script from your terminal:
 
 ```bash
 python mk3_mix_gui.py
@@ -69,3 +77,6 @@ python mk3_mix_gui.py
 
 ## ⚠️ Disclaimer
 This application modifies Windows default audio endpoints on a per-application basis. Ensure you have the correct audio drivers installed and that applications are currently outputting audio (unmuted in the Windows volume mixer) for the hooks to latch onto them successfully.
+
+## ⚖️ Acknowledgements & Licensing
+This project utilizes [SoundVolumeView](https://www.nirsoft.net/utils/sound_volume_view.html) created by Nir Sofer (NirSoft) as the core audio manipulation engine. SoundVolumeView is distributed as freeware and is included in this repository under the terms of the NirSoft freeware distribution license.
