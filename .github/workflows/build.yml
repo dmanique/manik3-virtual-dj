@@ -1,4 +1,4 @@
-name: Build Windows Executable
+name: Build Windows Release Package
 
 on:
   push:
@@ -25,12 +25,36 @@ jobs:
         pip install pyinstaller
         pip install -r requirements.txt
 
-    - name: Build EXE with PyInstaller
+    - name: Build Standalone EXE with PyInstaller
       run: |
-        pyinstaller --noconfirm --onedir --windowed --name "MANIK3_Mixer" "mk3_mix_gui.py"
+        # --onefile makes it a single clean EXE instead of a messy folder
+        pyinstaller --noconfirm --onefile --windowed --name "MANIK3_Mixer" "mk3_mix_gui.py"
 
-    - name: Upload Artifact
+    - name: Create Distribution Package
+      run: |
+        # 1. Create a clean folder to hold the final release
+        mkdir MANIK3_Release
+        
+        # 2. Move the compiled EXE into the folder
+        Move-Item -Path "dist\MANIK3_Mixer.exe" -Destination "MANIK3_Release\"
+        
+        # 3. Copy the SoundVolumeView engine into the folder
+        Copy-Item -Path "SoundVolumeView.exe" -Destination "MANIK3_Release\"
+        
+        # 4. Create the required apps/ folder structure so users don't have to guess
+        mkdir MANIK3_Release\apps\Chrome1
+        mkdir MANIK3_Release\apps\Chrome2
+        mkdir MANIK3_Release\apps\VLC
+        
+        # 5. Create a quick "ReadMe" for the apps folder
+        echo "Place your portable Chrome and VLC folders in these directories." > MANIK3_Release\apps\README_APPS.txt
+
+    - name: Zip the Final Release
+      run: |
+        Compress-Archive -Path "MANIK3_Release\*" -DestinationPath "MANIK3_Virtual_DJ_v1.0.zip"
+
+    - name: Upload Final Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: MANIK3_Mixer_Windows
-        path: dist/MANIK3_Mixer
+        name: MANIK3_Virtual_DJ_Package
+        path: MANIK3_Virtual_DJ_v1.0.zip
