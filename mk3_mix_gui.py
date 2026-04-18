@@ -91,7 +91,6 @@ def iniciar_auto_setup():
 
     ctk.CTkLabel(setup_win, text="A INICIALIZAR WORKSPACE", font=("Impact", 20), text_color="#FFFFFF").pack(pady=(20, 5))
     
-    # Texto Atualizado: Apenas avisa sobre Chrome e VLC
     lbl_status = ctk.CTkLabel(setup_win, text="A transferir dependências (Chrome, VLC)...", font=("Segoe UI", 12))
     lbl_status.pack(pady=5)
 
@@ -514,11 +513,13 @@ btn_aplicar.pack(side="left", padx=10)
 # ==========================================
 # GATILHO DE ARRANQUE & AUTO-SETUP
 # ==========================================
-# Se a pasta apps não existir, avança com auto-setup das apps pesadas
-if not os.path.exists(PASTA_APPS):
+# Verifica se os ficheiros REAIS faltam, não apenas a pasta "apps" vazia que a pipeline gera
+falta_chrome1 = not os.path.exists(APPS_INFO["chrome1"]["caminho"])
+falta_vlc = not os.path.exists(APPS_INFO["vlc"]["caminho"])
+
+if falta_chrome1 or falta_vlc:
     janela.after(500, iniciar_auto_setup)
 else:
-    # Se já existir as apps mas faltar o SVV, dá apenas um aviso porque ele deveria vir com o EXE
     if not os.path.exists(CAMINHO_SVV):
         messagebox.showwarning("Aviso de Sistema", "SoundVolumeView.exe não foi encontrado na pasta principal!\nO roteamento de áudio não vai funcionar. Por favor, garante que ele está ao lado do ficheiro EXE.")
     janela.after(100, atualizar_listas)
