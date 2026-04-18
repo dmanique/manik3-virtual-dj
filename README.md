@@ -9,7 +9,7 @@ A graphical audio routing matrix and state manager designed to dynamically inter
 Built for live DJing and Karaoke environments, this tool eliminates the need to navigate clunky Windows audio settings by providing a tactile, 4-channel hardware-style mixer interface to route browsers, media players, and extra applications on the fly.
 
 ![MANIK3 Virtual DJ Screenshot](./screenshot.png) 
-*(Note: Add a screenshot of your GUI here and name it screenshot.png)*
+
 
 ## 🚀 Key Features
 
