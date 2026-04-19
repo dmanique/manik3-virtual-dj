@@ -13,7 +13,7 @@ v1.0.0
 ![MANIK3 Virtual DJ Screenshot](./screenshot.png) 
 
 v1.2.0
-![MANIK3 Virtual DJ Screenshot](./screenshot2.png) 
+![MANIK3 Virtual DJ Screenshot](./screenshot1.png) 
 
 ## 🚀 Key Features
 
