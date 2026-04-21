@@ -63,7 +63,7 @@ APPS_INFO = {
 }
 
 APPS_CH3 = ["vlc.exe", "vlcportable.exe", "spotify.exe", "wmplayer.exe"]
-APPS_CH4 = ["pikaraoke.exe", "msedge.exe", "firefox.exe"]
+APPS_CH4 = ["vlc.exe", "vlcportable.exe", "spotify.exe", "wmplayer.exe"]
 
 update_funcs = {}
 
@@ -194,7 +194,6 @@ def process_routing(app_name, destination, card_a, card_b):
 
 
 def mute_other_apps():
-    """Mutes all applications EXCEPT the ones currently selected in the matrix."""
     protected = ["chrome1.exe", "chrome2.exe"]
     app3 = combo_app3.get().split(" ")[0].strip().lower()
     app4 = combo_app4.get().split(" ")[0].strip().lower()
@@ -212,19 +211,16 @@ def mute_other_apps():
                     for row in csv.reader(f):
                         if len(row) >= 1:
                             name = str(row[0]).strip().lower()
-                            # Only target .exe files to avoid muting the Master Hardware Volumes
                             if name.endswith(".exe") and name not in protected:
                                 apps_to_mute.add(name)
                 break
             except:
                 continue
 
-        # Mute all unprotected background apps
         for app in apps_to_mute:
             subprocess.run([SVV_PATH, "/Mute", app], shell=False, creationflags=NO_WINDOW, stdin=subprocess.DEVNULL)
     except:
         pass
-
     if os.path.exists(temp_file):
         try:
             os.remove(temp_file)
@@ -247,7 +243,6 @@ def handle_routing_request(ch_id, requested_state):
     state_vars = {1: state_ch1, 2: state_ch2, 3: state_ch3, 4: state_ch4}
     apps = {1: "chrome1.exe", 2: "chrome2.exe", 3: combo_app3.get(), 4: combo_app4.get()}
 
-    # Exclusive Filtering
     if requested_state in ["LINE 1", "LINE 2"]:
         for other_id, s_var in state_vars.items():
             if other_id != ch_id and s_var.get() == requested_state:
@@ -275,31 +270,32 @@ def update_live_displays():
     st1, st2, st3, st4 = state_ch1.get(), state_ch2.get(), state_ch3.get(), state_ch4.get()
 
     if st1 == "LINE 1":
-        l1_apps.append("CH 1: YouTube 1")
+        l1_apps.append("CH1: YT 1")
     elif st1 == "LINE 2":
-        l2_apps.append("CH 1: YouTube 1")
+        l2_apps.append("CH1: YT 1")
 
     if st2 == "LINE 1":
-        l1_apps.append("CH 2: YouTube 2")
+        l1_apps.append("CH2: YT 2")
     elif st2 == "LINE 2":
-        l2_apps.append("CH 2: YouTube 2")
+        l2_apps.append("CH2: YT 2")
 
     app3 = combo_app3.get().replace(".exe", "")
     if "Select" not in app3 and app3 != "None Found":
         if st3 == "LINE 1":
-            l1_apps.append(f"CH 3: {app3}")
+            l1_apps.append(f"CH3: {app3[:8]}")
         elif st3 == "LINE 2":
-            l2_apps.append(f"CH 3: {app3}")
+            l2_apps.append(f"CH3: {app3[:8]}")
 
     app4 = combo_app4.get().replace(".exe", "")
     if "Select" not in app4 and app4 != "None Found":
         if st4 == "LINE 1":
-            l1_apps.append(f"CH 4: {app4}")
+            l1_apps.append(f"CH4: {app4[:8]}")
         elif st4 == "LINE 2":
-            l2_apps.append(f"CH 4: {app4}")
+            l2_apps.append(f"CH4: {app4[:8]}")
 
-    lbl_display_line1.configure(text="\n".join(l1_apps) if l1_apps else "--- SILENCE ---")
-    lbl_display_line2.configure(text="\n".join(l2_apps) if l2_apps else "--- SILENCE ---")
+    # Use spacer for wide horizontal monitors
+    lbl_display_line1.configure(text="   |   ".join(l1_apps) if l1_apps else "--- SILENCE ---")
+    lbl_display_line2.configure(text="   |   ".join(l2_apps) if l2_apps else "--- SILENCE ---")
 
 
 def update_lists():
@@ -352,7 +348,6 @@ def open_settings():
         def save_and_close():
             v1 = var_line1.get()
             v2 = var_line2.get()
-            # If successfully configured, turn the main SETUP button Green and execute App Mute Lockdown
             if "Select" not in v1 and "Loading" not in v1 and "Select" not in v2 and "Loading" not in v2:
                 btn_setup.configure(fg_color=COLOR_LINE1)
                 threading.Thread(target=mute_other_apps, daemon=True).start()
@@ -375,15 +370,99 @@ def open_settings():
 
 
 # ==========================================
-# GUI BUILDER (FUSED GRID SYSTEM WITH CONTROL ZONES)
+# MAIN WINDOW: HORIZONTAL PATCHBAY LAYOUT
 # ==========================================
-def create_routing_block(parent, var_state, default, bid):
-    # The distinct visual "Control Zone" panel requested by user
-    frame = ctk.CTkFrame(parent, fg_color="#121212", corner_radius=8, border_width=1, border_color="#2A2A2A")
-    btn_style = {"height": 32, "font": ("Segoe UI", 12, "bold")}
+janela = ctk.CTk()
+janela.title("MANIK3 VIRTUAL DJ")
+# FIXED: Resizable Horizontally (True), Locked Vertically (False). Exact minimum dimensions to wrap layout.
+janela.geometry("1060x220")
+janela.minsize(1060, 220)
+janela.resizable(True, False)
+janela.configure(fg_color=COLOR_BG_APP)
+
+var_line1, var_line2 = ctk.StringVar(value="Select sound card..."), ctk.StringVar(value="Select sound card...")
+state_ch1, state_ch2, state_ch3, state_ch4 = ctk.StringVar(), ctk.StringVar(), ctk.StringVar(), ctk.StringVar()
+
+main_container = ctk.CTkFrame(janela, fg_color="transparent")
+main_container.pack(fill="both", expand=True, padx=5, pady=5)
+
+# ------------------------------------------
+# COLUMN 1: HEADER & SLOGAN
+# ------------------------------------------
+col1 = ctk.CTkFrame(main_container, fg_color="transparent")
+col1.pack(side="left", fill="y", padx=(5, 10))
+
+ctk.CTkLabel(col1, text="DJ MANIK3", font=("Impact", 42), text_color="#FFF").pack(anchor="center", pady=(5, 0))
+ctk.CTkLabel(col1, text="V I R T U A L   D J   M I X E R", font=("Segoe UI", 10, "bold"), text_color="#AAA").pack(
+    anchor="center")
+
+slogan = '"So as you struggle to catch the rhythm,\nask yourself,\ncan you dance to MANIQUE,\nto my beat"'
+ctk.CTkLabel(col1, text=slogan, font=("Segoe UI", 10, "italic", "bold"), text_color="#666", justify="center").pack(
+    anchor="center", pady=(10, 0))
+
+# ------------------------------------------
+# COLUMN 2: LAUNCHPAD & COMBOBOXES
+# ------------------------------------------
+col2 = ctk.CTkFrame(main_container, fg_color="transparent")
+col2.pack(side="left", fill="y", padx=(0, 10))
+
+# Top Half: Buttons
+launch_frame = ctk.CTkFrame(col2, fg_color="transparent")
+launch_frame.pack(side="top", fill="x", pady=(5, 10))
+
+base_btn_style = {"font": ("Segoe UI", 11, "bold"), "height": 30, "width": 60}
+ctk.CTkButton(launch_frame, text="CH1", fg_color=COLOR_BTN_LAUNCH, command=lambda: launch_program("chrome1"),
+              **base_btn_style).grid(row=0, column=0, padx=2, pady=2)
+ctk.CTkButton(launch_frame, text="CH2", fg_color=COLOR_BTN_LAUNCH, command=lambda: launch_program("chrome2"),
+              **base_btn_style).grid(row=0, column=1, padx=2, pady=2)
+ctk.CTkButton(launch_frame, text="VLC", fg_color=COLOR_BTN_LAUNCH, command=lambda: launch_program("vlc"),
+              **base_btn_style).grid(row=0, column=2, padx=2, pady=2)
+btn_setup = ctk.CTkButton(launch_frame, text="SETUP", fg_color=COLOR_MUTE, command=open_settings, **base_btn_style)
+btn_setup.grid(row=1, column=0, columnspan=3, sticky="we", padx=2, pady=(5, 0))
+
+# Bottom Half: App Comboboxes
+combo_frame = ctk.CTkFrame(col2, fg_color="transparent")
+combo_frame.pack(side="bottom", fill="x", pady=(0, 5))
+
+ctk.CTkLabel(combo_frame, text="CH 3 ", font=("Impact", 14), text_color="#FFF").grid(row=0, column=0, pady=2)
+combo_app3 = ctk.CTkComboBox(combo_frame, width=150, height=28, font=("Segoe UI", 11, "bold"),
+                             command=lambda val: on_combobox_change(3, val))
+combo_app3.grid(row=0, column=1, pady=2)
+
+ctk.CTkLabel(combo_frame, text="CH 4 ", font=("Impact", 14), text_color="#FFF").grid(row=1, column=0, pady=2)
+combo_app4 = ctk.CTkComboBox(combo_frame, width=150, height=28, font=("Segoe UI", 11, "bold"),
+                             command=lambda val: on_combobox_change(4, val))
+combo_app4.grid(row=1, column=1, pady=2)
+
+# ------------------------------------------
+# COLUMN 3: SOLID ROUTING GRID (Patchbay)
+# ------------------------------------------
+# ZERO Padding, ZERO Corner Radius for the solid block look
+col3 = ctk.CTkFrame(main_container, fg_color="#1E1E1E", corner_radius=0, border_width=1, border_color="#2A2A2A")
+col3.pack(side="left", fill="both", expand=False, padx=10, pady=5)
+
+# Configure the grid to expand evenly
+col3.grid_rowconfigure((1, 2, 3), weight=1)
+col3.grid_columnconfigure((0, 1, 2, 3), weight=1)
+
+
+def create_routing_column(parent, title, var, default, bid, col_index):
+    ctk.CTkLabel(parent, text=title, font=("Impact", 18), text_color="#FFF").grid(row=0, column=col_index, pady=8)
+
+    # Completely square buttons, no borders, filling the entire grid cell
+    btn_style = {"font": ("Segoe UI", 12, "bold"), "corner_radius": 0, "border_width": 0, "border_spacing": 0}
+
+    b1 = ctk.CTkButton(parent, text="LINE 1", **btn_style)
+    bm = ctk.CTkButton(parent, text="MUTE", **btn_style)
+    b2 = ctk.CTkButton(parent, text="LINE 2", **btn_style)
+
+    # Padding inside the grid is ZERO to fuse the buttons together
+    b1.grid(row=1, column=col_index, sticky="nsew", padx=0, pady=0)
+    bm.grid(row=2, column=col_index, sticky="nsew", padx=0, pady=0)
+    b2.grid(row=3, column=col_index, sticky="nsew", padx=0, pady=0)
 
     def update_colors(s, trigger=True):
-        var_state.set(s)
+        var.set(s)
         for b, st in [(b1, "LINE 1"), (bm, "MUTE"), (b2, "LINE 2")]:
             active = (s == st)
             b.configure(
@@ -392,130 +471,38 @@ def create_routing_block(parent, var_state, default, bid):
         if trigger:
             handle_routing_request(bid, s)
 
-    # Completely Fused Buttons with Explicit Widths
-    b1 = ctk.CTkButton(frame, text="LINE 1", width=70, corner_radius=6, command=lambda: update_colors("LINE 1"),
-                       **btn_style)
-    bm = ctk.CTkButton(frame, text="MUTE", width=60, corner_radius=0, command=lambda: update_colors("MUTE"),
-                       **btn_style)
-    b2 = ctk.CTkButton(frame, text="LINE 2", width=70, corner_radius=6, command=lambda: update_colors("LINE 2"),
-                       **btn_style)
-
-    # Internal padding to make the dark box frame visible around the buttons
-    b1.pack(side="left", padx=(4, 0), pady=4)
-    bm.pack(side="left", padx=0, pady=4)
-    b2.pack(side="left", padx=(0, 4), pady=4)
+    b1.configure(command=lambda: update_colors("LINE 1"))
+    bm.configure(command=lambda: update_colors("MUTE"))
+    b2.configure(command=lambda: update_colors("LINE 2"))
 
     update_funcs[bid] = update_colors
     update_colors(default, trigger=False)
-    return frame
 
 
-# Main Window
-janela = ctk.CTk()
-janela.title("MANIK3 VIRTUAL DJ")
-janela.geometry("400x620")  # Adjusted height to fit flawlessly
-janela.resizable(False, False)
-janela.configure(fg_color=COLOR_BG_APP)
+create_routing_column(col3, "CH 1", state_ch1, "MUTE", 1, 0)
+create_routing_column(col3, "CH 2", state_ch2, "MUTE", 2, 1)
+create_routing_column(col3, "CH 3", state_ch3, "MUTE", 3, 2)
+create_routing_column(col3, "CH 4", state_ch4, "MUTE", 4, 3)
 
-var_line1, var_line2 = ctk.StringVar(value="Select sound card..."), ctk.StringVar(value="Select sound card...")
-state_ch1, state_ch2, state_ch3, state_ch4 = ctk.StringVar(), ctk.StringVar(), ctk.StringVar(), ctk.StringVar()
-
-# Header
-header_frame = ctk.CTkFrame(janela, fg_color="transparent")
-header_frame.pack(pady=(15, 5), fill="x")
-ctk.CTkLabel(header_frame, text="DJ MANIK3", font=("Impact", 44), text_color="#FFF").pack()
-ctk.CTkLabel(header_frame, text="V I R T U A L   D J   M I X E R", font=("Segoe UI", 12, "bold"),
-             text_color="#AAA").pack()
-
-# Full 4-line Slogan Restored
-slogan = '"So as you struggle to catch the rhythm, \nask yourself, \ncan you dance to MANIQUE, \nto my beat"'
-ctk.CTkLabel(header_frame, text=slogan, font=("Segoe UI", 12, "italic", "bold"), text_color="#666",
-             justify="center").pack(pady=(5, 0))
-
-# Launchpad
-launch_frame = ctk.CTkFrame(janela, fg_color="transparent")
-launch_frame.pack(pady=(8, 4))
-base_btn_style = {"font": ("Segoe UI", 11, "bold"), "height": 28, "width": 90}
-ctk.CTkButton(launch_frame, text="🌐 CH1", fg_color=COLOR_BTN_LAUNCH, command=lambda: launch_program("chrome1"),
-              **base_btn_style).grid(row=0, column=0, padx=4)
-ctk.CTkButton(launch_frame, text="🌐 CH2", fg_color=COLOR_BTN_LAUNCH, command=lambda: launch_program("chrome2"),
-              **base_btn_style).grid(row=0, column=1, padx=4)
-ctk.CTkButton(launch_frame, text="▶ VLC", fg_color=COLOR_BTN_LAUNCH, command=lambda: launch_program("vlc"),
-              **base_btn_style).grid(row=0, column=2, padx=4)
-btn_setup = ctk.CTkButton(launch_frame, text="⚙️ SETUP", fg_color=COLOR_MUTE, command=open_settings, **base_btn_style)
-btn_setup.grid(row=0, column=3, padx=4)
-
-# ==========================================
-# UNIFIED MATRIX CONTAINER
-# ==========================================
-matrix_container = ctk.CTkFrame(janela, fg_color=COLOR_BG_FRAME, corner_radius=12, border_width=2,
-                                border_color="#2A2A2A")
-matrix_container.pack(padx=20, pady=10, fill="x")
+# ------------------------------------------
+# COLUMN 4: LIVE MONITORS (Stretches Horizontally)
+# ------------------------------------------
+col4 = ctk.CTkFrame(main_container, fg_color="transparent")
+col4.pack(side="left", fill="both", expand=True)  # expand=True allows window stretching
 
 
-def add_static_row(ch_title, sub_title, var, default, bid, is_last=False):
-    f = ctk.CTkFrame(matrix_container, fg_color="transparent")
-    f.pack(fill="x", pady=6)
-    f.grid_columnconfigure(0, weight=1)
-    f.grid_columnconfigure(1, weight=0)
+def create_vertical_monitor(parent, title, color):
+    f = ctk.CTkFrame(parent, fg_color="#1A1A1A", border_width=2, border_color=color, corner_radius=0)
+    f.pack(fill="both", expand=True, pady=2, padx=4)
 
-    left_cont = ctk.CTkFrame(f, fg_color="transparent")
-    left_cont.grid(row=0, column=0, sticky="w", padx=15)
-    ctk.CTkLabel(left_cont, text=ch_title, font=("Impact", 22), text_color="#FFF").pack(side="left", padx=(0, 6))
-    ctk.CTkLabel(left_cont, text=sub_title, font=("Segoe UI", 12, "bold"), text_color="#AAA").pack(side="left")
-
-    create_routing_block(f, var, default, bid).grid(row=0, column=1, sticky="e", padx=10)
-
-    if not is_last:
-        ctk.CTkFrame(matrix_container, height=2, fg_color="#2A2A2A").pack(fill="x", padx=15)
-
-
-def add_dynamic_row(ch_title, var, default, bid, is_last=False):
-    f = ctk.CTkFrame(matrix_container, fg_color="transparent")
-    f.pack(fill="x", pady=6)
-    f.grid_columnconfigure(0, weight=1)
-    f.grid_columnconfigure(1, weight=0)
-
-    left_cont = ctk.CTkFrame(f, fg_color="transparent")
-    left_cont.grid(row=0, column=0, sticky="w", padx=15)
-    ctk.CTkLabel(left_cont, text=ch_title, font=("Impact", 22), text_color="#FFF").pack(side="left", padx=(0, 6))
-
-    cb = ctk.CTkComboBox(left_cont, width=125, height=32, font=("Segoe UI", 12, "bold"),
-                         command=lambda val: on_combobox_change(bid, val))
-    cb.pack(side="left")
-
-    create_routing_block(f, var, default, bid).grid(row=0, column=1, sticky="e", padx=10)
-
-    if not is_last:
-        ctk.CTkFrame(matrix_container, height=2, fg_color="#2A2A2A").pack(fill="x", padx=15)
-    return cb
-
-
-add_static_row("■ CH 1:", "YT1", state_ch1, "MUTE", 1)
-add_static_row("■ CH 2:", "YT2", state_ch2, "MUTE", 2)
-combo_app3 = add_dynamic_row("■ CH 3:", state_ch3, "MUTE", 3)
-combo_app4 = add_dynamic_row("■ CH 4:", state_ch4, "MUTE", 4, is_last=True)
-
-# Live Monitors
-display_frame = ctk.CTkFrame(janela, fg_color="transparent")
-display_frame.pack(padx=20, pady=(5, 0), fill="x")
-display_frame.grid_columnconfigure(0, weight=1)
-display_frame.grid_columnconfigure(1, weight=1)
-
-
-def create_monitor(parent, title, color, col):
-    f = ctk.CTkFrame(parent, fg_color="#1A1A1A", border_width=3, border_color=color, corner_radius=12)
-    f.grid(row=0, column=col, padx=6, sticky="nsew")
-
-    ctk.CTkLabel(f, text=title, font=("Impact", 22), text_color=color).pack(pady=(16, 8))
-    lbl = ctk.CTkLabel(f, text="--- SILENCE ---", font=("Segoe UI", 14, "bold"), text_color="#FFF")
-    lbl.pack(pady=(0, 24))
-
+    ctk.CTkLabel(f, text=title, font=("Impact", 16), text_color=color).pack(pady=(12, 0))
+    lbl = ctk.CTkLabel(f, text="--- SILENCE ---", font=("Segoe UI", 12, "bold"), text_color="#FFF")
+    lbl.pack(pady=(0, 12), fill="both", expand=True)
     return lbl
 
 
-lbl_display_line1 = create_monitor(display_frame, "LIVE LINE 1", COLOR_LINE1, 0)
-lbl_display_line2 = create_monitor(display_frame, "LIVE LINE 2", COLOR_LINE2, 1)
+lbl_display_line1 = create_vertical_monitor(col4, "LINE 1", COLOR_LINE1)
+lbl_display_line2 = create_vertical_monitor(col4, "LINE 2", COLOR_LINE2)
 
 # Initialize App
 if __name__ == "__main__":
